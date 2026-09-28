@@ -98,7 +98,7 @@ async function loginWithGoogle() {
     const { error } = await supabaseClient.auth.signInWithOAuth({
         provider: "google",
         options: {
-            redirectTo: window.location.origin,
+            redirectTo: "https://arefaammar05-byte.github.io/FOLLOWUP/",
             queryParams: {
                 prompt: "select_account"
             }
