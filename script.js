@@ -89,16 +89,18 @@ async function handleLogin(event) {
     loginButton.textContent = "Login";
 }
 
-
 async function loginWithGoogle() {
+
     const errorBox = document.getElementById("loginError");
 
     errorBox.textContent = "";
 
     const { error } = await supabaseClient.auth.signInWithOAuth({
         provider: "google",
+
         options: {
             redirectTo: "https://arefaammar05-byte.github.io/FOLLOWUP/",
+
             queryParams: {
                 prompt: "select_account"
             }
