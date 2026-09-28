@@ -91,26 +91,33 @@ async function handleLogin(event) {
 
 async function loginWithGoogle() {
 
-    const errorBox = document.getElementById("loginError");
+    const errorBox =
+        document.getElementById("loginError");
 
     errorBox.textContent = "";
 
-    const { error } = await supabaseClient.auth.signInWithOAuth({
+    const { error } =
+    await supabaseClient.auth.signInWithOAuth({
+
         provider: "google",
 
         options: {
+
             redirectTo: "https://arefaammar05-byte.github.io/FOLLOWUP/",
 
             queryParams: {
                 prompt: "select_account"
             }
+
         }
+
     });
 
     if (error) {
         errorBox.textContent = error.message;
     }
 }
+
 
 
 async function logout() {
