@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FOLLOWUP — Business Manager</title>
+    <link rel="stylesheet" href="./style.css">
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#0f1115">
+</head>
+
+<body>
+
+    <!-- LOGIN SCREEN -->
+    <section id="loginScreen" class="login-screen">
+        <div class="login-card">
+
+            <div class="login-logo">
+                FOLLOWUP
+            </div>
+
+            <p class="login-subtitle">Business Manager</p>
+
+            <form id="loginForm">
+
+                <div class="form-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" placeholder="Enter your email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" placeholder="Enter your password" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary login-btn">
+                    Login
+                </button>
+
+                <div class="login-divider">
+                    <span>OR</span>
+                </div>
+
+                <button type="button" id="googleLoginBtn" class="btn google-btn">
+                    <span class="google-icon">G</span>
+                    Continue with Google
+                </button>
+
+                <p id="loginError" class="login-error"></p>
+
+            </form>
+
+        </div>
+    </section>
+
+
+    <!-- LOADING SCREEN -->
+    <section id="loadingScreen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-logo">FOLLOWUP</div>
+            <div class="loading-line">
+                <div class="loading-progress"></div>
+            </div>
+            <p>Getting things ready...</p>
+        </div>
+    </section>
+
+
+    <!-- MAIN APP -->
+    <div id="app" class="app">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+
+            <div class="sidebar-brand">
+                <div class="brand-name">FOLLOWUP</div>
+                <div class="brand-subtitle">Business Manager</div>
+            </div>
+
+            <nav class="sidebar-nav">
+
+                <button class="nav-item active" data-section="dashboard">
+                    <span>▦</span>
+                    Dashboard
+                </button>
+
+                <button class="nav-item" data-section="customers">
+                    <span>♙</span>
+                    Customers
+                </button>
+
+                <button class="nav-item" data-section="payments">
+                    <span>◈</span>
+                    Payments
+                </button>
+
+                <button class="nav-item" data-section="followups">
+                    <span>✓</span>
+                    Follow-ups
+                </button>
+
+            </nav>
+
+            <div class="sidebar-bottom">
+
+                <div class="cloud-status">
+                    <span class="cloud-dot"></span> Cloud mode
+                </div>
+
+                <button id="logoutBtn" class="logout-btn">
+                    Log out
+                </button>
+
+            </div>
+
+        </aside>
+
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+
+            <!-- TOPBAR -->
+            <header class="topbar">
+
+                <div>
+                    <h1 id="pageTitle">Dashboard</h1>
+                    <p id="pageSubtitle">
+                        Here's what's happening with your business.
+                    </p>
+                </div>
+
+                <button id="openModal" class="btn btn-primary">
+                    + Add Customer
+                </button>
+
+            </header>
+
+
+            <!-- DASHBOARD -->
+            <section id="dashboardSection" class="page-section">
+
+                <div class="stats-grid">
+
+                    <div class="stat-card">
+                        <div class="stat-label">Total Customers</div>
+                        <div id="totalCustomers" class="stat-value">0</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-label">Money Owed</div>
+                        <div id="moneyOwed" class="stat-value">Rs. 0.00</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-label">Follow Up Today</div>
+                        <div id="todayCustomers" class="stat-value">0</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-label">Total Paid</div>
+                        <div id="totalPaid" class="stat-value">Rs. 0.00</div>
+                    </div>
+
+                </div>
+
+
+                <div class="dashboard-grid">
+
+                    <div class="panel">
+
+                        <div class="panel-header">
+                            <h2>Money Overview</h2>
+                        </div>
+
+                        <div class="money-overview">
+
+                            <div class="money-row">
+                                <span>Total invoiced</span>
+                                <strong id="totalInvoiced">
+                                    Rs. 0.00
+                                </strong>
+                            </div>
+
+                            <div class="money-row">
+                                <span>Total paid</span>
+                                <strong id="overviewPaid">
+                                    Rs. 0.00
+                                </strong>
+                            </div>
+
+                            <div class="money-row">
+                                <span>Still owed</span>
+                                <strong id="overviewOwed">
+                                    Rs. 0.00
+                                </strong>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="panel">
+
+                        <div class="panel-header">
+                            <h2>Follow Up Today</h2>
+                        </div>
+
+                        <div id="todayList" class="simple-list">
+                            <div class="empty-small">
+                                No follow-ups today.
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <div class="panel">
+
+                    <div class="panel-header">
+                        <h2>Recent Customers</h2>
+                    </div>
+
+                    <div id="recentCustomers" class="customer-list">
+                        <div class="empty-small">
+                            No customers yet.
+                        </div>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- CUSTOMERS -->
+            <section id="customersSection" class="page-section" style="display: none;">
+
+                <div class="section-toolbar">
+
+                    <div class="search-box">
+                        <input type="text" id="customerSearch" placeholder="Search customers...">
+                    </div>
+
+                    <button id="customersAddBtn" class="btn btn-primary">
+                        + Add Customer
+                    </button>
+
+                </div>
+
+
+                <div id="fullCustomerList" class="customer-grid"></div>
+
+
+                <div id="customerEmpty" class="empty-state" style="display: none;">
+                    <div class="empty-icon">♙</div>
+                    <h3>No customers yet</h3>
+                    <p>Add your first customer to get started.</p>
+
+                    <button id="emptyAddBtn" class="btn btn-primary">
+                        + Add Customer
+                    </button>
+                </div>
+
+            </section>
+
+
+            <!-- PAYMENTS -->
+            <section id="paymentsSection" class="page-section" style="display: none;">
+
+                <div class="stats-grid payment-stats">
+
+                    <div class="stat-card">
+                        <div class="stat-label">Outstanding</div>
+                        <div id="paymentOutstanding" class="stat-value">
+                            Rs. 0.00
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-label">Received</div>
+                        <div id="paymentReceived" class="stat-value">
+                            Rs. 0.00
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-label">Customers Owing</div>
+                        <div id="customersOwing" class="stat-value">
+                            0
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <div class="panel">
+
+                    <div class="panel-header">
+                        <h2>Outstanding Payments</h2>
+                    </div>
+
+                    <div id="paymentList" class="customer-list">
+                        <div class="empty-small">
+                            No outstanding payments.
+                        </div>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- FOLLOW-UPS -->
+            <section id="followupsSection" class="page-section" style="display: none;">
+
+                <div class="panel">
+
+                    <div class="panel-header">
+                        <h2>Follow-ups</h2>
+                    </div>
+
+                    <div id="followupList" class="customer-list">
+                        <div class="empty-small">
+                            No follow-ups yet.
+                        </div>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- FOOTER -->
+            <footer class="footer">
+                FOLLOWUP — Business Manager
+            </footer>
+
+        </main>
+
+    </div>
+
+
+    <!-- ADD / EDIT CUSTOMER MODAL -->
+    <div id="customerModal" class="modal-overlay" style="display: none;">
+
+        <div class="modal">
+
+            <div class="modal-header">
+                <h2 id="customerModalTitle">Add Customer</h2>
+
+                <button id="closeCustomerModal" class="modal-close">
+                    ×
+                </button>
+            </div>
+
+
+            <form id="customerForm">
+
+                <input type="hidden" id="customerId">
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label for="customerName">Name</label>
+                        <input type="text" id="customerName" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="customerContact">Contact</label>
+                        <input type="text" id="customerContact">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="customerService">Service</label>
+                        <input type="text" id="customerService">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="customerTotal">Total Amount</label>
+                        <input type="number" id="customerTotal" min="0" step="0.01">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="customerPaid">Amount Paid</label>
+                        <input type="number" id="customerPaid" min="0" step="0.01">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="paymentDue">Payment Due</label>
+                        <input type="date" id="paymentDue">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="followUpDate">Follow Up</label>
+                        <input type="date" id="followUpDate">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="customerStatus">Status</label>
+
+                        <select id="customerStatus">
+
+                            <option value="waiting">
+                                Waiting
+                            </option>
+
+                            <option value="confirmed">
+                                Confirmed
+                            </option>
+
+                            <option value="completed">
+                                Completed
+                            </option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+
+                <div class="modal-actions">
+
+                    <button type="button" id="cancelCustomerModal" class="btn btn-secondary">
+                        Cancel
+                    </button>
+
+                    <button type="submit" class="btn btn-primary">
+                        Save Customer
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- CUSTOMER PROFILE MODAL -->
+    <div id="profileModal" class="modal-overlay" style="display: none;">
+
+        <div class="modal profile-modal">
+
+            <div class="modal-header">
+
+                <div>
+                    <h2 id="profileName">Customer</h2>
+                    <p id="profileService"></p>
+                </div>
+
+                <button id="closeProfileModal" class="modal-close">
+                    ×
+                </button>
+
+            </div>
+
+
+            <div class="profile-money-grid">
+
+                <div class="profile-money">
+                    <span>Total</span>
+                    <strong id="profileTotal">Rs. 0.00</strong>
+                </div>
+
+                <div class="profile-money">
+                    <span>Paid</span>
+                    <strong id="profilePaid">Rs. 0.00</strong>
+                </div>
+
+                <div class="profile-money">
+                    <span>Owed</span>
+                    <strong id="profileOwed">Rs. 0.00</strong>
+                </div>
+
+            </div>
+
+
+            <div class="profile-details">
+
+                <div>
+                    <span>Contact</span>
+                    <strong id="profileContact">—</strong>
+                </div>
+
+                <div>
+                    <span>Status</span>
+                    <strong id="profileStatus">—</strong>
+                </div>
+
+                <div>
+                    <span>Payment Due</span>
+                    <strong id="profilePaymentDue">—</strong>
+                </div>
+
+                <div>
+                    <span>Follow Up</span>
+                    <strong id="profileFollowUp">—</strong>
+                </div>
+
+            </div>
+
+
+            <div class="profile-history">
+
+                <h3>Payment History</h3>
+
+                <div id="paymentHistory">
+                    <div class="empty-small">
+                        No payments recorded.
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="modal-actions profile-actions">
+
+                <button id="profileEditBtn" class="btn btn-secondary">
+                    Edit
+                </button>
+
+                <button id="profilePaymentBtn" class="btn btn-primary">
+                    Record Payment
+                </button>
+
+                <button id="profileFollowupBtn" class="btn btn-secondary">
+                    Mark Follow-up Done
+                </button>
+
+                <button id="profileDeleteBtn" class="btn btn-danger">
+                    Delete
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- PAYMENT MODAL -->
+    <div id="paymentModal" class="modal-overlay" style="display: none;">
+
+        <div class="modal">
+
+            <div class="modal-header">
+
+                <h2>Record Payment</h2>
+
+                <button id="closePaymentModal" class="modal-close">
+                    ×
+                </button>
+
+            </div>
+
+
+            <form id="paymentForm">
+
+                <input type="hidden" id="paymentCustomerId">
+
+                <div class="payment-customer-name">
+                    <span>Customer</span>
+                    <strong id="paymentCustomerName">
+                        —
+                    </strong>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="paymentAmount">
+                        Payment Amount
+                    </label>
+
+                    <input type="number" id="paymentAmount" min="0" step="0.01" required>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="paymentNote">
+                        Note
+                    </label>
+
+                    <textarea id="paymentNote" rows="3" placeholder="Optional payment note"></textarea>
+                </div>
+
+
+                <div class="modal-actions">
+
+                    <button type="button" id="cancelPaymentModal" class="btn btn-secondary">
+                        Cancel
+                    </button>
+
+                    <button type="submit" class="btn btn-primary">
+                        Save Payment
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- SUPABASE -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- APP SCRIPT -->
+    <script src="./script.js"></script>
+
+</body>
+
+</html>
