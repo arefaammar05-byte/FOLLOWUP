@@ -1,6 +1,8 @@
-const CACHE_NAME = "followup-v2";
+"use strict";
 
-const FILES_TO_CACHE = [
+const CACHE_NAME = "followup-v3";
+
+const APP_FILES = [
     "./",
     "./index.html",
     "./style.css",
@@ -8,38 +10,127 @@ const FILES_TO_CACHE = [
     "./manifest.json"
 ];
 
+
+/* INSTALL */
+
 self.addEventListener("install", function(event) {
+
     event.waitUntil(
-        caches.open(CACHE_NAME).then(function(cache) {
-            return cache.addAll(FILES_TO_CACHE);
+
+        caches.open(CACHE_NAME)
+        .then(function(cache) {
+
+            return cache.addAll(APP_FILES);
+
         })
+        .then(function() {
+
+            return self.skipWaiting();
+
+        })
+
     );
 
-    self.skipWaiting();
 });
+
+
+/* ACTIVATE */
 
 self.addEventListener("activate", function(event) {
+
     event.waitUntil(
-        caches.keys().then(function(cacheNames) {
+
+        caches.keys()
+        .then(function(cacheNames) {
+
             return Promise.all(
+
                 cacheNames
                 .filter(function(cacheName) {
+
                     return cacheName !== CACHE_NAME;
+
                 })
                 .map(function(cacheName) {
+
                     return caches.delete(cacheName);
+
                 })
+
             );
+
         })
+        .then(function() {
+
+            return self.clients.claim();
+
+        })
+
     );
 
-    self.clients.claim();
 });
 
+
+/* FETCH */
+
 self.addEventListener("fetch", function(event) {
+
+    if (event.request.method !== "GET") {
+        return;
+    }
+
+
+    const requestUrl =
+        new URL(event.request.url);
+
+
+    /* Never interfere with external services */
+
+    if (
+        requestUrl.origin !==
+        self.location.origin
+    ) {
+        return;
+    }
+
+
+    /* Always get navigation pages from the network */
+
+    if (
+        event.request.mode === "navigate"
+    ) {
+
+        event.respondWith(
+
+            fetch(event.request)
+            .catch(function() {
+
+                return caches.match(
+                    "./index.html"
+                );
+
+            })
+
+        );
+
+        return;
+    }
+
+
+    /* Cache static files */
+
     event.respondWith(
-        caches.match(event.request).then(function(cachedResponse) {
-            return cachedResponse || fetch(event.request);
+
+        caches.match(event.request)
+        .then(function(cachedResponse) {
+
+            return (
+                cachedResponse ||
+                fetch(event.request)
+            );
+
         })
+
     );
+
 });

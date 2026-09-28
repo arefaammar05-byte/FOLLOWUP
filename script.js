@@ -4,15 +4,17 @@
    SUPABASE
 ========================================================= */
 
-const SUPABASE_URL = "https://yjuwwtdoiwiyjtbajnls.supabase.co";
+const SUPABASE_URL =
+    "https://yjuwwtdoiwiyjtbajnls.supabase.co";
 
 const SUPABASE_PUBLISHABLE_KEY =
     "sb_publishable_HbXClZksRhtYGIEklIipEg_octlae2G";
 
-const supabaseClient = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_PUBLISHABLE_KEY
-);
+const supabaseClient =
+    window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY
+    );
 
 
 /* =========================================================
@@ -28,66 +30,113 @@ let currentProfileId = null;
 ========================================================= */
 
 async function checkAuth() {
-    const loadingScreen = document.getElementById("loadingScreen");
-    const loginScreen = document.getElementById("loginScreen");
-    const app = document.getElementById("app");
+
+    const loadingScreen =
+        document.getElementById("loadingScreen");
+
+    const loginScreen =
+        document.getElementById("loginScreen");
+
+    const app =
+        document.getElementById("app");
 
     try {
+
         const {
             data: { session }
         } = await supabaseClient.auth.getSession();
 
+        if (!loginScreen || !app) {
+            return;
+        }
+
         if (session) {
+
             loginScreen.classList.add("hidden");
             app.style.display = "";
+
         } else {
+
             loginScreen.classList.remove("hidden");
             app.style.display = "none";
-        }
-    } catch (error) {
-        console.error("Authentication error:", error);
 
-        loginScreen.classList.remove("hidden");
-        app.style.display = "none";
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Authentication error:",
+            error
+        );
+
+        if (loginScreen) {
+            loginScreen.classList.remove("hidden");
+        }
+
+        if (app) {
+            app.style.display = "none";
+        }
+
     } finally {
+
         if (loadingScreen) {
             loadingScreen.classList.add("hidden");
         }
+
     }
 }
 
 
 async function handleLogin(event) {
+
     event.preventDefault();
 
-    const email = document.getElementById("loginEmail").value.trim();
-    const password = document.getElementById("loginPassword").value;
-    const errorBox = document.getElementById("loginError");
-    const loginButton = document.querySelector(".login-btn");
+    const email =
+        document.getElementById("loginEmail").value.trim();
+
+    const password =
+        document.getElementById("loginPassword").value;
+
+    const errorBox =
+        document.getElementById("loginError");
+
+    const loginButton =
+        document.querySelector(".login-btn");
 
     errorBox.textContent = "";
+
     loginButton.disabled = true;
     loginButton.textContent = "Logging in...";
 
-    const { error } = await supabaseClient.auth.signInWithPassword({
+    const { error } =
+    await supabaseClient.auth.signInWithPassword({
         email: email,
         password: password
     });
 
     if (error) {
-        errorBox.textContent = "Incorrect email or password.";
+
+        console.error("Login error:", error);
+
+        errorBox.textContent =
+            "Incorrect email or password.";
+
         loginButton.disabled = false;
         loginButton.textContent = "Login";
+
         return;
     }
 
-    document.getElementById("loginForm").reset();
+    document
+        .getElementById("loginForm")
+        .reset();
 
     await startApp();
 
     loginButton.disabled = false;
     loginButton.textContent = "Login";
 }
+
 
 async function loginWithGoogle() {
 
@@ -96,6 +145,9 @@ async function loginWithGoogle() {
 
     errorBox.textContent = "";
 
+    const redirectUrl =
+        "https://arefaammar05-byte.github.io/FOLLOWUP/";
+
     const { error } =
     await supabaseClient.auth.signInWithOAuth({
 
@@ -103,7 +155,7 @@ async function loginWithGoogle() {
 
         options: {
 
-            redirectTo: "https://arefaammar05-byte.github.io/FOLLOWUP/",
+            redirectTo: redirectUrl,
 
             queryParams: {
                 prompt: "select_account"
@@ -114,23 +166,38 @@ async function loginWithGoogle() {
     });
 
     if (error) {
-        errorBox.textContent = error.message;
+
+        console.error(
+            "Google login error:",
+            error
+        );
+
+        errorBox.textContent =
+            error.message;
     }
 }
 
 
-
 async function logout() {
+
     await supabaseClient.auth.signOut();
 
     customers = [];
     currentProfileId = null;
 
-    document.getElementById("app").style.display = "none";
+    const app =
+        document.getElementById("app");
 
-    document
-        .getElementById("loginScreen")
-        .classList.remove("hidden");
+    const loginScreen =
+        document.getElementById("loginScreen");
+
+    if (app) {
+        app.style.display = "none";
+    }
+
+    if (loginScreen) {
+        loginScreen.classList.remove("hidden");
+    }
 
     document.getElementById("loginEmail").value = "";
     document.getElementById("loginPassword").value = "";
@@ -143,6 +210,7 @@ async function logout() {
 ========================================================= */
 
 async function startApp() {
+
     const {
         data: { session }
     } = await supabaseClient.auth.getSession();
@@ -151,16 +219,25 @@ async function startApp() {
         return;
     }
 
-    document
-        .getElementById("loginScreen")
-        .classList.add("hidden");
+    const loginScreen =
+        document.getElementById("loginScreen");
 
-    document.getElementById("app").style.display = "";
+    const app =
+        document.getElementById("app");
+
+    if (loginScreen) {
+        loginScreen.classList.add("hidden");
+    }
+
+    if (app) {
+        app.style.display = "";
+    }
 
     await loadCustomers();
 
     setupNavigation();
     setupSearch();
+
     renderAll();
 }
 
@@ -170,6 +247,7 @@ async function startApp() {
 ========================================================= */
 
 async function loadCustomers() {
+
     const {
         data,
         error
@@ -181,8 +259,14 @@ async function loadCustomers() {
         });
 
     if (error) {
-        console.error("Could not load customers:", error);
+
+        console.error(
+            "Could not load customers:",
+            error
+        );
+
         customers = [];
+
         return;
     }
 
@@ -195,6 +279,7 @@ async function loadCustomers() {
 ========================================================= */
 
 async function createCustomer(customerData) {
+
     const {
         data: { user }
     } = await supabaseClient.auth.getUser();
@@ -209,23 +294,42 @@ async function createCustomer(customerData) {
     } = await supabaseClient
         .from("customers")
         .insert({
+
             user_id: user.id,
+
             name: customerData.name,
+
             contact: customerData.contact,
+
             service: customerData.service,
+
             total: customerData.total,
+
             paid: customerData.paid,
+
             payment_due: customerData.paymentDue || null,
+
             follow_up: customerData.followUp || null,
+
             follow_up_done: false,
+
             status: customerData.status
+
         })
         .select()
         .single();
 
     if (error) {
-        console.error("Could not create customer:", error);
-        alert("Could not save customer. Please try again.");
+
+        console.error(
+            "Could not create customer:",
+            error
+        );
+
+        alert(
+            "Could not save customer. Please try again."
+        );
+
         return null;
     }
 
@@ -233,29 +337,50 @@ async function createCustomer(customerData) {
 }
 
 
-async function updateCustomerInDatabase(id, customerData) {
+async function updateCustomerInDatabase(
+    id,
+    customerData
+) {
+
     const {
         data,
         error
     } = await supabaseClient
         .from("customers")
         .update({
+
             name: customerData.name,
+
             contact: customerData.contact,
+
             service: customerData.service,
+
             total: customerData.total,
+
             paid: customerData.paid,
+
             payment_due: customerData.paymentDue || null,
+
             follow_up: customerData.followUp || null,
+
             status: customerData.status
+
         })
         .eq("id", id)
         .select()
         .single();
 
     if (error) {
-        console.error("Could not update customer:", error);
-        alert("Could not update customer. Please try again.");
+
+        console.error(
+            "Could not update customer:",
+            error
+        );
+
+        alert(
+            "Could not update customer. Please try again."
+        );
+
         return null;
     }
 
@@ -268,25 +393,39 @@ async function updateCustomerInDatabase(id, customerData) {
 ========================================================= */
 
 function money(amount) {
-    const value = Number(amount) || 0;
 
-    return "Rs. " + value.toLocaleString("en-LK", {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2
-    });
+    const value =
+        Number(amount) || 0;
+
+    return "Rs. " +
+        value.toLocaleString("en-LK", {
+
+            minimumFractionDigits: 0,
+
+            maximumFractionDigits: 2
+
+        });
 }
 
 
 function getPaid(customer) {
+
     return Number(customer.paid) || 0;
 }
 
 
 function getOwed(customer) {
-    const total = Number(customer.total) || 0;
-    const paid = getPaid(customer);
 
-    return Math.max(0, total - paid);
+    const total =
+        Number(customer.total) || 0;
+
+    const paid =
+        getPaid(customer);
+
+    return Math.max(
+        0,
+        total - paid
+    );
 }
 
 
@@ -295,34 +434,54 @@ function getOwed(customer) {
 ========================================================= */
 
 function todayString() {
+
     const date = new Date();
 
-    const year = date.getFullYear();
+    const year =
+        date.getFullYear();
 
-    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const month =
+        String(
+            date.getMonth() + 1
+        ).padStart(2, "0");
 
-    const day = String(date.getDate()).padStart(2, "0");
+    const day =
+        String(
+            date.getDate()
+        ).padStart(2, "0");
 
-    return year + "-" + month + "-" + day;
+    return (
+        year +
+        "-" +
+        month +
+        "-" +
+        day
+    );
 }
 
 
 function formatDate(dateString) {
+
     if (!dateString) {
         return "—";
     }
 
-    const date = new Date(dateString + "T00:00:00");
+    const date =
+        new Date(
+            dateString + "T00:00:00"
+        );
 
     if (isNaN(date.getTime())) {
         return "—";
     }
 
-    return date.toLocaleDateString("en-LK", {
-        day: "numeric",
-        month: "short",
-        year: "numeric"
-    });
+    return date.toLocaleDateString(
+        "en-LK", {
+            day: "numeric",
+            month: "short",
+            year: "numeric"
+        }
+    );
 }
 
 
@@ -331,12 +490,18 @@ function formatDate(dateString) {
 ========================================================= */
 
 function escapeHtml(value) {
+
     return String(value || "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+
+    .replace(/&/g, "&amp;")
+
+    .replace(/</g, "&lt;")
+
+    .replace(/>/g, "&gt;")
+
+    .replace(/"/g, "&quot;")
+
+    .replace(/'/g, "&#039;");
 }
 
 
@@ -345,88 +510,170 @@ function escapeHtml(value) {
 ========================================================= */
 
 function setupNavigation() {
-    const navItems = document.querySelectorAll(".nav-item");
+
+    const navItems =
+        document.querySelectorAll(".nav-item");
 
     navItems.forEach(function(item) {
-        item.addEventListener("click", function() {
-            const section = item.getAttribute("data-section");
 
-            showSection(section);
+        item.addEventListener(
+            "click",
+            function() {
 
-            const sidebar = document.querySelector(".sidebar");
+                const section =
+                    item.getAttribute(
+                        "data-section"
+                    );
 
-            if (sidebar) {
-                sidebar.classList.remove("mobile-open");
+                showSection(section);
+
+                const sidebar =
+                    document.querySelector(
+                        ".sidebar"
+                    );
+
+                if (sidebar) {
+
+                    sidebar.classList.remove(
+                        "mobile-open"
+                    );
+                }
+
             }
-        });
+        );
+
     });
 
-    const goButtons = document.querySelectorAll("[data-go]");
+
+    const goButtons =
+        document.querySelectorAll(
+            "[data-go]"
+        );
 
     goButtons.forEach(function(button) {
-        button.addEventListener("click", function() {
-            const section = button.getAttribute("data-go");
 
-            showSection(section);
-        });
+        button.addEventListener(
+            "click",
+            function() {
+
+                const section =
+                    button.getAttribute(
+                        "data-go"
+                    );
+
+                showSection(section);
+
+            }
+        );
+
     });
+
 }
 
 
 function showSection(section) {
-    const sections = document.querySelectorAll(".page-section");
+
+    const sections =
+        document.querySelectorAll(
+            ".page-section"
+        );
 
     sections.forEach(function(item) {
+
         item.classList.remove("active");
+
         item.style.display = "none";
+
     });
 
-    const target = document.getElementById(section + "Section");
+
+    const target =
+        document.getElementById(
+            section + "Section"
+        );
 
     if (target) {
+
         target.classList.add("active");
+
         target.style.display = "";
+
     }
 
-    const navItems = document.querySelectorAll(".nav-item");
+
+    const navItems =
+        document.querySelectorAll(
+            ".nav-item"
+        );
 
     navItems.forEach(function(item) {
+
         item.classList.remove("active");
 
-        if (item.getAttribute("data-section") === section) {
+        if (
+            item.getAttribute(
+                "data-section"
+            ) === section
+        ) {
+
             item.classList.add("active");
+
         }
+
     });
 
+
     const titles = {
+
         dashboard: {
+
             title: "Dashboard",
+
             subtitle: "Here's what's happening with your business."
+
         },
 
         customers: {
+
             title: "Customers",
+
             subtitle: "Manage your customers and their payments."
+
         },
 
         payments: {
+
             title: "Payments",
+
             subtitle: "Track money received and outstanding."
+
         },
 
         followups: {
+
             title: "Follow-ups",
+
             subtitle: "Keep track of customers who need attention."
+
         }
+
     };
 
+
     if (titles[section]) {
-        document.getElementById("pageTitle").textContent =
+
+        document.getElementById(
+                "pageTitle"
+            ).textContent =
             titles[section].title;
 
-        document.getElementById("pageSubtitle").textContent =
+        document.getElementById(
+                "pageSubtitle"
+            ).textContent =
             titles[section].subtitle;
+
     }
+
 }
 
 
@@ -435,15 +682,27 @@ function showSection(section) {
 ========================================================= */
 
 function setupSearch() {
-    const search = document.getElementById("customerSearch");
+
+    const search =
+        document.getElementById(
+            "customerSearch"
+        );
 
     if (!search) {
         return;
     }
 
-    search.addEventListener("input", function() {
-        renderCustomers(search.value);
-    });
+    search.addEventListener(
+        "input",
+        function() {
+
+            renderCustomers(
+                search.value
+            );
+
+        }
+    );
+
 }
 
 
@@ -452,10 +711,15 @@ function setupSearch() {
 ========================================================= */
 
 function renderAll() {
+
     renderDashboard();
+
     renderCustomers();
+
     renderPayments();
+
     renderFollowups();
+
 }
 
 
@@ -464,48 +728,96 @@ function renderAll() {
 ========================================================= */
 
 function renderDashboard() {
+
     let totalInvoiced = 0;
+
     let totalPaid = 0;
+
     let totalOwed = 0;
 
+
     customers.forEach(function(customer) {
-        totalInvoiced += Number(customer.total) || 0;
-        totalPaid += getPaid(customer);
-        totalOwed += getOwed(customer);
+
+        totalInvoiced +=
+            Number(customer.total) || 0;
+
+        totalPaid +=
+            getPaid(customer);
+
+        totalOwed +=
+            getOwed(customer);
+
     });
 
-    document.getElementById("totalCustomers").textContent =
+
+    document.getElementById(
+            "totalCustomers"
+        ).textContent =
         customers.length;
 
-    document.getElementById("moneyOwed").textContent =
+
+    document.getElementById(
+            "moneyOwed"
+        ).textContent =
         money(totalOwed);
 
-    document.getElementById("totalPaid").textContent =
+
+    document.getElementById(
+            "totalPaid"
+        ).textContent =
         money(totalPaid);
 
-    document.getElementById("totalInvoiced").textContent =
+
+    document.getElementById(
+            "totalInvoiced"
+        ).textContent =
         money(totalInvoiced);
 
-    document.getElementById("overviewPaid").textContent =
+
+    document.getElementById(
+            "overviewPaid"
+        ).textContent =
         money(totalPaid);
 
-    document.getElementById("overviewOwed").textContent =
+
+    document.getElementById(
+            "overviewOwed"
+        ).textContent =
         money(totalOwed);
 
-    const today = todayString();
 
-    const todayCustomers = customers.filter(function(customer) {
-        return (
-            customer.follow_up === today &&
-            !customer.follow_up_done
+    const today =
+        todayString();
+
+
+    const todayCustomers =
+        customers.filter(
+            function(customer) {
+
+                return (
+
+                    customer.follow_up === today &&
+
+                    !customer.follow_up_done
+
+                );
+
+            }
         );
-    });
 
-    document.getElementById("todayCustomers").textContent =
+
+    document.getElementById(
+            "todayCustomers"
+        ).textContent =
         todayCustomers.length;
 
-    renderTodayList(todayCustomers);
+
+    renderTodayList(
+        todayCustomers
+    );
+
     renderRecentCustomers();
+
 }
 
 
@@ -514,47 +826,89 @@ function renderDashboard() {
 ========================================================= */
 
 function renderTodayList(list) {
-    const container = document.getElementById("todayList");
+
+    const container =
+        document.getElementById(
+            "todayList"
+        );
 
     if (!container) {
         return;
     }
 
+
     if (list.length === 0) {
+
         container.innerHTML =
-            '<div class="empty-inline">No follow-ups for today.</div>';
+            '<div class="empty-inline">' +
+            'No follow-ups for today.' +
+            '</div>';
+
         return;
+
     }
+
 
     container.innerHTML = "";
 
-    list.forEach(function(customer) {
-        const item = document.createElement("div");
 
-        item.className = "today-item";
+    list.forEach(function(customer) {
+
+        const item =
+            document.createElement("div");
+
+        item.className =
+            "today-item";
+
 
         item.innerHTML =
-            '<div class="item-main">' +
-            "<strong>" +
-            escapeHtml(customer.name) +
-            "</strong>" +
-            "<span>" +
-            escapeHtml(customer.service || "Customer") +
-            "</span>" +
-            "</div>" +
-            '<div class="item-right">' +
-            "<strong>" +
-            money(getOwed(customer)) +
-            "</strong>" +
-            "<span>owed</span>" +
-            "</div>";
 
-        item.addEventListener("click", function() {
-            openProfile(customer.id);
-        });
+            '<div class="item-main">' +
+
+            '<strong>' +
+            escapeHtml(
+                customer.name
+            ) +
+            '</strong>' +
+
+            '<span>' +
+            escapeHtml(
+                customer.service ||
+                "Customer"
+            ) +
+            '</span>' +
+
+            '</div>' +
+
+            '<div class="item-right">' +
+
+            '<strong>' +
+            money(
+                getOwed(customer)
+            ) +
+            '</strong>' +
+
+            '<span>owed</span>' +
+
+            '</div>';
+
+
+        item.addEventListener(
+            "click",
+            function() {
+
+                openProfile(
+                    customer.id
+                );
+
+            }
+        );
+
 
         container.appendChild(item);
+
     });
+
 }
 
 
@@ -563,49 +917,112 @@ function renderTodayList(list) {
 ========================================================= */
 
 function renderRecentCustomers() {
-    const container = document.getElementById("recentCustomers");
+
+    const container =
+        document.getElementById(
+            "recentCustomers"
+        );
 
     if (!container) {
         return;
     }
 
+
     if (customers.length === 0) {
+
         container.innerHTML =
-            '<div class="empty-inline">No customers yet.</div>';
+            '<div class="empty-inline">' +
+            'No customers yet.' +
+            '</div>';
+
         return;
+
     }
 
-    const recent = customers.slice(0, 5);
+
+    const recent =
+        customers
+        .slice()
+        .sort(
+            function(a, b) {
+
+                return (
+
+                    Number(
+                        b.created_at
+                    ) -
+
+                    Number(
+                        a.created_at
+                    )
+
+                );
+
+            }
+        )
+        .slice(0, 5);
+
 
     container.innerHTML = "";
 
-    recent.forEach(function(customer) {
-        const item = document.createElement("div");
 
-        item.className = "recent-item";
+    recent.forEach(function(customer) {
+
+        const item =
+            document.createElement("div");
+
+        item.className =
+            "recent-item";
+
 
         item.innerHTML =
-            '<div class="item-main">' +
-            "<strong>" +
-            escapeHtml(customer.name) +
-            "</strong>" +
-            "<span>" +
-            escapeHtml(customer.service || "Customer") +
-            "</span>" +
-            "</div>" +
-            '<div class="item-right">' +
-            "<strong>" +
-            money(getOwed(customer)) +
-            "</strong>" +
-            "<span>owed</span>" +
-            "</div>";
 
-        item.addEventListener("click", function() {
-            openProfile(customer.id);
-        });
+            '<div class="item-main">' +
+
+            '<strong>' +
+            escapeHtml(
+                customer.name
+            ) +
+            '</strong>' +
+
+            '<span>' +
+            escapeHtml(
+                customer.service ||
+                "Customer"
+            ) +
+            '</span>' +
+
+            '</div>' +
+
+            '<div class="item-right">' +
+
+            '<strong>' +
+            money(
+                getOwed(customer)
+            ) +
+            '</strong>' +
+
+            '<span>owed</span>' +
+
+            '</div>';
+
+
+        item.addEventListener(
+            "click",
+            function() {
+
+                openProfile(
+                    customer.id
+                );
+
+            }
+        );
+
 
         container.appendChild(item);
+
     });
+
 }
 
 
@@ -613,133 +1030,229 @@ function renderRecentCustomers() {
    CUSTOMERS
 ========================================================= */
 
-function renderCustomers(searchTerm = "") {
-    const container = document.getElementById("fullCustomerList");
-    const empty = document.getElementById("customerEmpty");
+function renderCustomers(
+    searchTerm = ""
+) {
+
+    const container =
+        document.getElementById(
+            "fullCustomerList"
+        );
+
+    const empty =
+        document.getElementById(
+            "customerEmpty"
+        );
 
     if (!container || !empty) {
         return;
     }
 
-    const term = searchTerm.trim().toLowerCase();
 
-    const filtered = customers.filter(function(customer) {
-        return (
-            String(customer.name || "")
-            .toLowerCase()
-            .includes(term) ||
+    const term =
+        searchTerm
+        .trim()
+        .toLowerCase();
 
-            String(customer.contact || "")
-            .toLowerCase()
-            .includes(term) ||
 
-            String(customer.service || "")
-            .toLowerCase()
-            .includes(term)
+    const filtered =
+        customers.filter(
+            function(customer) {
+
+                return (
+
+                    String(
+                        customer.name || ""
+                    )
+                    .toLowerCase()
+                    .includes(term)
+
+                    ||
+
+                    String(
+                        customer.contact || ""
+                    )
+                    .toLowerCase()
+                    .includes(term)
+
+                    ||
+
+                    String(
+                        customer.service || ""
+                    )
+                    .toLowerCase()
+                    .includes(term)
+
+                );
+
+            }
         );
-    });
+
 
     container.innerHTML = "";
 
+
     if (filtered.length === 0) {
+
         empty.style.display = "";
+
         return;
+
     }
+
 
     empty.style.display = "none";
 
-    filtered.forEach(function(customer) {
-        const card = document.createElement("div");
 
-        card.className = "customer-card";
+    filtered.forEach(
+        function(customer) {
 
-        card.innerHTML =
-            '<div class="customer-card-top">' +
-            "<div>" +
-            "<h3>" +
-            escapeHtml(customer.name) +
-            "</h3>" +
-            '<div class="customer-service">' +
-            escapeHtml(customer.service || "No service") +
-            "</div>" +
-            "</div>" +
+            const card =
+                document.createElement("div");
 
-            '<span class="status-badge status-' +
-            escapeHtml(customer.status || "waiting") +
-            '">' +
-            escapeHtml(customer.status || "waiting") +
-            "</span>" +
+            card.className =
+                "customer-card";
 
-            "</div>" +
 
-            '<div class="customer-contact">' +
-            escapeHtml(customer.contact || "No contact") +
-            "</div>" +
+            card.innerHTML =
 
-            '<div class="customer-financials">' +
+                '<div class="customer-card-top">' +
 
-            "<div>" +
-            "<span>Total</span>" +
-            "<strong>" +
-            money(customer.total) +
-            "</strong>" +
-            "</div>" +
+                '<div>' +
 
-            "<div>" +
-            "<span>Paid</span>" +
-            "<strong>" +
-            money(getPaid(customer)) +
-            "</strong>" +
-            "</div>" +
+                '<h3>' +
+                escapeHtml(
+                    customer.name
+                ) +
+                '</h3>' +
 
-            "<div>" +
-            "<span>Owed</span>" +
-            '<strong class="customer-owed">' +
-            money(getOwed(customer)) +
-            "</strong>" +
-            "</div>" +
+                '<div class="customer-service">' +
+                escapeHtml(
+                    customer.service ||
+                    "No service"
+                ) +
+                '</div>' +
 
-            "</div>" +
+                '</div>' +
 
-            '<div class="customer-card-actions">' +
+                '<span class="status-badge status-' +
+                escapeHtml(
+                    customer.status ||
+                    "waiting"
+                ) +
+                '">' +
 
-            '<button class="secondary-btn view-btn">' +
-            "View Profile" +
-            "</button>" +
+                escapeHtml(
+                    customer.status ||
+                    "waiting"
+                ) +
 
-            '<button class="secondary-btn payment-btn">' +
-            "Payment" +
-            "</button>" +
+                '</span>' +
 
-            '<button class="danger-btn delete-btn">' +
-            "Delete" +
-            "</button>" +
+                '</div>' +
 
-            "</div>";
+                '<div class="customer-contact">' +
+                escapeHtml(
+                    customer.contact ||
+                    "No contact"
+                ) +
+                '</div>' +
 
-        card.querySelector(".view-btn").addEventListener(
-            "click",
-            function() {
-                openProfile(customer.id);
-            }
-        );
+                '<div class="customer-financials">' +
 
-        card.querySelector(".payment-btn").addEventListener(
-            "click",
-            function() {
-                openPaymentModal(customer.id);
-            }
-        );
+                '<div>' +
+                '<span>Total</span>' +
+                '<strong>' +
+                money(
+                    customer.total
+                ) +
+                '</strong>' +
+                '</div>' +
 
-        card.querySelector(".delete-btn").addEventListener(
-            "click",
-            function() {
-                deleteCustomer(customer.id);
-            }
-        );
+                '<div>' +
+                '<span>Paid</span>' +
+                '<strong>' +
+                money(
+                    getPaid(customer)
+                ) +
+                '</strong>' +
+                '</div>' +
 
-        container.appendChild(card);
-    });
+                '<div>' +
+                '<span>Owed</span>' +
+                '<strong class="customer-owed">' +
+                money(
+                    getOwed(customer)
+                ) +
+                '</strong>' +
+                '</div>' +
+
+                '</div>' +
+
+                '<div class="customer-card-actions">' +
+
+                '<button class="secondary-btn view-btn">' +
+                'View Profile' +
+                '</button>' +
+
+                '<button class="secondary-btn payment-btn">' +
+                'Payment' +
+                '</button>' +
+
+                '<button class="danger-btn delete-btn">' +
+                'Delete' +
+                '</button>' +
+
+                '</div>';
+
+
+            card.querySelector(
+                ".view-btn"
+            ).addEventListener(
+                "click",
+                function() {
+
+                    openProfile(
+                        customer.id
+                    );
+
+                }
+            );
+
+
+            card.querySelector(
+                ".payment-btn"
+            ).addEventListener(
+                "click",
+                function() {
+
+                    openPaymentModal(
+                        customer.id
+                    );
+
+                }
+            );
+
+
+            card.querySelector(
+                ".delete-btn"
+            ).addEventListener(
+                "click",
+                function() {
+
+                    deleteCustomer(
+                        customer.id
+                    );
+
+                }
+            );
+
+
+            container.appendChild(card);
+
+        }
+    );
+
 }
 
 
@@ -747,151 +1260,303 @@ function renderCustomers(searchTerm = "") {
    CUSTOMER MODAL
 ========================================================= */
 
-function openCustomerModal(customerId = null) {
-    const modal = document.getElementById("customerModal");
-    const form = document.getElementById("customerForm");
+function openCustomerModal(
+    customerId = null
+) {
+
+    const modal =
+        document.getElementById(
+            "customerModal"
+        );
+
+    const form =
+        document.getElementById(
+            "customerForm"
+        );
+
 
     form.reset();
 
-    document.getElementById("customerId").value = "";
 
-    document.getElementById("customerModalTitle").textContent =
+    document.getElementById(
+        "customerId"
+    ).value = "";
+
+
+    document.getElementById(
+            "customerModalTitle"
+        ).textContent =
         "Add Customer";
 
-    document.getElementById("customerStatus").value =
+
+    document.getElementById(
+            "customerStatus"
+        ).value =
         "waiting";
 
+
     if (customerId) {
-        const customer = customers.find(function(item) {
-            return item.id === customerId;
-        });
+
+        const customer =
+            customers.find(
+                function(item) {
+
+                    return item.id === customerId;
+
+                }
+            );
+
 
         if (!customer) {
             return;
         }
 
-        document.getElementById("customerModalTitle").textContent =
+
+        document.getElementById(
+                "customerModalTitle"
+            ).textContent =
             "Edit Customer";
 
-        document.getElementById("customerId").value =
+
+        document.getElementById(
+                "customerId"
+            ).value =
             customer.id;
 
-        document.getElementById("customerName").value =
+
+        document.getElementById(
+                "customerName"
+            ).value =
             customer.name || "";
 
-        document.getElementById("customerContact").value =
+
+        document.getElementById(
+                "customerContact"
+            ).value =
             customer.contact || "";
 
-        document.getElementById("customerService").value =
+
+        document.getElementById(
+                "customerService"
+            ).value =
             customer.service || "";
 
-        document.getElementById("customerTotal").value =
+
+        document.getElementById(
+                "customerTotal"
+            ).value =
             customer.total || 0;
 
-        document.getElementById("customerPaid").value =
+
+        document.getElementById(
+                "customerPaid"
+            ).value =
             getPaid(customer);
 
-        document.getElementById("paymentDue").value =
+
+        document.getElementById(
+                "paymentDue"
+            ).value =
             customer.payment_due || "";
 
-        document.getElementById("followUpDate").value =
+
+        document.getElementById(
+                "followUpDate"
+            ).value =
             customer.follow_up || "";
 
-        document.getElementById("customerStatus").value =
+
+        document.getElementById(
+                "customerStatus"
+            ).value =
             customer.status || "waiting";
+
     }
 
+
     modal.style.display = "flex";
+
     modal.classList.add("active");
 
-    document.getElementById("customerName").focus();
+
+    document.getElementById(
+        "customerName"
+    ).focus();
+
 }
 
 
 function closeCustomerModal() {
-    const modal = document.getElementById("customerModal");
+
+    const modal =
+        document.getElementById(
+            "customerModal"
+        );
 
     if (modal) {
-        modal.classList.remove("active");
+
+        modal.classList.remove(
+            "active"
+        );
+
         modal.style.display = "none";
+
     }
+
 }
 
 
-async function handleCustomerSubmit(event) {
+async function handleCustomerSubmit(
+    event
+) {
+
     event.preventDefault();
 
-    const id = document.getElementById("customerId").value.trim();
 
-    const name = document.getElementById("customerName").value.trim();
+    const id =
+        document.getElementById(
+            "customerId"
+        ).value.trim();
+
+
+    const name =
+        document.getElementById(
+            "customerName"
+        ).value.trim();
+
 
     const contact =
-        document.getElementById("customerContact").value.trim();
+        document.getElementById(
+            "customerContact"
+        ).value.trim();
+
 
     const service =
-        document.getElementById("customerService").value.trim();
+        document.getElementById(
+            "customerService"
+        ).value.trim();
+
 
     const total =
-        Number(document.getElementById("customerTotal").value) || 0;
+        Number(
+            document.getElementById(
+                "customerTotal"
+            ).value
+        ) || 0;
+
 
     const paid =
-        Number(document.getElementById("customerPaid").value) || 0;
+        Number(
+            document.getElementById(
+                "customerPaid"
+            ).value
+        ) || 0;
+
 
     const paymentDue =
-        document.getElementById("paymentDue").value;
+        document.getElementById(
+            "paymentDue"
+        ).value;
+
 
     const followUp =
-        document.getElementById("followUpDate").value;
+        document.getElementById(
+            "followUpDate"
+        ).value;
+
 
     const status =
-        document.getElementById("customerStatus").value;
+        document.getElementById(
+            "customerStatus"
+        ).value;
+
 
     if (!name) {
-        alert("Please enter the customer name.");
+
+        alert(
+            "Please enter the customer name."
+        );
+
         return;
     }
 
-    if (total < 0 || paid < 0) {
-        alert("Amounts cannot be negative.");
+
+    if (
+        total < 0 ||
+        paid < 0
+    ) {
+
+        alert(
+            "Amounts cannot be negative."
+        );
+
         return;
     }
+
 
     if (paid > total) {
+
         alert(
             "Amount paid cannot be greater than the total amount."
         );
+
         return;
     }
 
+
     const customerData = {
-        name,
-        contact,
-        service,
-        total,
-        paid,
-        paymentDue,
-        followUp,
-        status
+
+        name: name,
+
+        contact: contact,
+
+        service: service,
+
+        total: total,
+
+        paid: paid,
+
+        paymentDue: paymentDue,
+
+        followUp: followUp,
+
+        status: status
+
     };
+
 
     let savedCustomer;
 
+
     if (id) {
-        savedCustomer = await updateCustomerInDatabase(
-            id,
-            customerData
-        );
+
+        savedCustomer =
+            await updateCustomerInDatabase(
+                id,
+                customerData
+            );
+
     } else {
-        savedCustomer = await createCustomer(customerData);
+
+        savedCustomer =
+            await createCustomer(
+                customerData
+            );
+
     }
+
 
     if (!savedCustomer) {
         return;
     }
 
+
     await loadCustomers();
+
     renderAll();
+
     closeCustomerModal();
+
 }
 
 
@@ -899,76 +1564,175 @@ async function handleCustomerSubmit(event) {
    PROFILE
 ========================================================= */
 
-function openProfile(customerId) {
-    const customer = customers.find(function(item) {
-        return item.id === customerId;
-    });
+function openProfile(
+    customerId
+) {
+
+    const customer =
+        customers.find(
+            function(item) {
+
+                return item.id === customerId;
+
+            }
+        );
+
 
     if (!customer) {
         return;
     }
 
-    currentProfileId = customerId;
 
-    document.getElementById("profileName").textContent =
-        customer.name || "Customer";
+    currentProfileId =
+        customerId;
 
-    document.getElementById("profileService").textContent =
-        customer.service || "No service added";
 
-    document.getElementById("profileTotal").textContent =
-        money(customer.total);
+    document.getElementById(
+            "profileName"
+        ).textContent =
+        customer.name ||
+        "Customer";
 
-    document.getElementById("profilePaid").textContent =
-        money(getPaid(customer));
 
-    document.getElementById("profileOwed").textContent =
-        money(getOwed(customer));
+    document.getElementById(
+            "profileService"
+        ).textContent =
+        customer.service ||
+        "No service added";
 
-    document.getElementById("profileContact").textContent =
-        customer.contact || "—";
 
-    document.getElementById("profileStatus").textContent =
-        customer.status || "—";
+    document.getElementById(
+            "profileTotal"
+        ).textContent =
+        money(
+            customer.total
+        );
 
-    document.getElementById("profilePaymentDue").textContent =
-        formatDate(customer.payment_due);
 
-    document.getElementById("profileFollowUp").textContent =
-        formatDate(customer.follow_up);
+    document.getElementById(
+            "profilePaid"
+        ).textContent =
+        money(
+            getPaid(customer)
+        );
 
-    renderPaymentHistory(customer);
+
+    document.getElementById(
+            "profileOwed"
+        ).textContent =
+        money(
+            getOwed(customer)
+        );
+
+
+    document.getElementById(
+            "profileContact"
+        ).textContent =
+        customer.contact ||
+        "—";
+
+
+    document.getElementById(
+            "profileStatus"
+        ).textContent =
+        customer.status ||
+        "—";
+
+
+    document.getElementById(
+            "profilePaymentDue"
+        ).textContent =
+        formatDate(
+            customer.payment_due
+        );
+
+
+    document.getElementById(
+            "profileFollowUp"
+        ).textContent =
+        formatDate(
+            customer.follow_up
+        );
+
+
+    renderPaymentHistory(
+        customer
+    );
+
 
     const followupButton =
-        document.getElementById("profileFollowupBtn");
+        document.getElementById(
+            "profileFollowupBtn"
+        );
+
 
     if (customer.follow_up_done) {
-        followupButton.textContent = "Follow-up Done";
-        followupButton.disabled = true;
-    } else if (customer.follow_up) {
-        followupButton.textContent = "Mark Follow-up Done";
-        followupButton.disabled = false;
+
+        followupButton.textContent =
+            "Follow-up Done";
+
+        followupButton.disabled =
+            true;
+
+    } else if (
+        customer.follow_up
+    ) {
+
+        followupButton.textContent =
+            "Mark Follow-up Done";
+
+        followupButton.disabled =
+            false;
+
     } else {
-        followupButton.textContent = "No Follow-up";
-        followupButton.disabled = true;
+
+        followupButton.textContent =
+            "No Follow-up";
+
+        followupButton.disabled =
+            true;
+
     }
 
-    const modal = document.getElementById("profileModal");
+
+    const modal =
+        document.getElementById(
+            "profileModal"
+        );
+
 
     modal.style.display = "flex";
-    modal.classList.add("active");
+
+    modal.classList.add(
+        "active"
+    );
+
 }
 
 
 function closeProfileModal() {
-    const modal = document.getElementById("profileModal");
+
+    const modal =
+        document.getElementById(
+            "profileModal"
+        );
+
 
     if (modal) {
-        modal.classList.remove("active");
-        modal.style.display = "none";
+
+        modal.classList.remove(
+            "active"
+        );
+
+        modal.style.display =
+            "none";
+
     }
 
-    currentProfileId = null;
+
+    currentProfileId =
+        null;
+
 }
 
 
@@ -976,29 +1740,56 @@ function closeProfileModal() {
    PAYMENT HISTORY
 ========================================================= */
 
-function renderPaymentHistory(customer) {
-    const container = document.getElementById("paymentHistory");
+function renderPaymentHistory(
+    customer
+) {
+
+    const container =
+        document.getElementById(
+            "paymentHistory"
+        );
+
 
     if (!container) {
         return;
     }
 
-    if (getPaid(customer) <= 0) {
+
+    if (
+        getPaid(customer) <= 0
+    ) {
+
         container.innerHTML =
-            '<div class="empty-inline">No payments recorded yet.</div>';
+            '<div class="empty-inline">' +
+            'No payments recorded yet.' +
+            '</div>';
+
         return;
     }
 
+
     container.innerHTML =
+
         '<div class="profile-history-item">' +
-        "<div>" +
-        "<strong>" +
-        money(getPaid(customer)) +
-        "</strong>" +
-        "<span>Total payments received</span>" +
-        "</div>" +
-        "<span>Current</span>" +
-        "</div>";
+
+        '<div>' +
+
+        '<strong>' +
+        money(
+            getPaid(customer)
+        ) +
+        '</strong>' +
+
+        '<span>' +
+        'Total payments received' +
+        '</span>' +
+
+        '</div>' +
+
+        '<span>Current</span>' +
+
+        '</div>';
+
 }
 
 
@@ -1006,95 +1797,197 @@ function renderPaymentHistory(customer) {
    PAYMENT MODAL
 ========================================================= */
 
-function openPaymentModal(customerId) {
-    const customer = customers.find(function(item) {
-        return item.id === customerId;
-    });
+function openPaymentModal(
+    customerId
+) {
+
+    const customer =
+        customers.find(
+            function(item) {
+
+                return item.id === customerId;
+
+            }
+        );
+
 
     if (!customer) {
         return;
     }
 
-    document.getElementById("paymentCustomerId").value =
+
+    document.getElementById(
+            "paymentCustomerId"
+        ).value =
         customer.id;
 
-    document.getElementById("paymentCustomerName").textContent =
+
+    document.getElementById(
+            "paymentCustomerName"
+        ).textContent =
         customer.name;
 
-    document.getElementById("paymentAmount").value = "";
-    document.getElementById("paymentNote").value = "";
 
-    const modal = document.getElementById("paymentModal");
+    document.getElementById(
+        "paymentAmount"
+    ).value = "";
 
-    modal.style.display = "flex";
-    modal.classList.add("active");
+
+    document.getElementById(
+        "paymentNote"
+    ).value = "";
+
+
+    const modal =
+        document.getElementById(
+            "paymentModal"
+        );
+
+
+    modal.style.display =
+        "flex";
+
+
+    modal.classList.add(
+        "active"
+    );
+
 }
 
 
 function closePaymentModal() {
-    const modal = document.getElementById("paymentModal");
+
+    const modal =
+        document.getElementById(
+            "paymentModal"
+        );
+
 
     if (modal) {
-        modal.classList.remove("active");
-        modal.style.display = "none";
+
+        modal.classList.remove(
+            "active"
+        );
+
+        modal.style.display =
+            "none";
+
     }
+
 }
 
 
-async function handlePaymentSubmit(event) {
+async function handlePaymentSubmit(
+    event
+) {
+
     event.preventDefault();
 
+
     const customerId =
-        document.getElementById("paymentCustomerId").value;
+        document.getElementById(
+            "paymentCustomerId"
+        ).value;
+
 
     const amount =
-        Number(document.getElementById("paymentAmount").value) || 0;
+        Number(
+            document.getElementById(
+                "paymentAmount"
+            ).value
+        ) || 0;
 
-    const customer = customers.find(function(item) {
-        return item.id === customerId;
-    });
+
+    const customer =
+        customers.find(
+            function(item) {
+
+                return item.id === customerId;
+
+            }
+        );
+
 
     if (!customer) {
         return;
     }
 
+
     if (amount <= 0) {
-        alert("Please enter a valid payment amount.");
+
+        alert(
+            "Please enter a valid payment amount."
+        );
+
         return;
     }
 
-    if (amount > getOwed(customer)) {
+
+    if (
+        amount > getOwed(customer)
+    ) {
+
         alert(
             "Payment cannot be greater than the amount owed."
         );
+
         return;
     }
 
-    const newPaid = getPaid(customer) + amount;
 
-    const { error } = await supabaseClient
+    const newPaid =
+        getPaid(customer) +
+        amount;
+
+
+    const { error } =
+    await supabaseClient
+
         .from("customers")
-        .update({
-            paid: newPaid
-        })
-        .eq("id", customer.id);
+
+    .update({
+        paid: newPaid
+    })
+
+    .eq(
+        "id",
+        customer.id
+    );
+
 
     if (error) {
-        console.error("Payment error:", error);
+
+        console.error(
+            "Payment error:",
+            error
+        );
+
         alert(
             "Could not record payment. Please try again."
         );
+
         return;
     }
 
+
     await loadCustomers();
+
     renderAll();
 
     closePaymentModal();
 
-    if (currentProfileId === customer.id) {
-        openProfile(customer.id);
+
+    if (
+        currentProfileId ===
+        customer.id
+    ) {
+
+        openProfile(
+            customer.id
+        );
+
     }
+
 }
 
 
@@ -1103,14 +1996,20 @@ async function handlePaymentSubmit(event) {
 ========================================================= */
 
 function editCurrentCustomer() {
+
     if (!currentProfileId) {
         return;
     }
 
-    const id = currentProfileId;
+
+    const id =
+        currentProfileId;
+
 
     closeProfileModal();
+
     openCustomerModal(id);
+
 }
 
 
@@ -1118,50 +2017,90 @@ function editCurrentCustomer() {
    DELETE
 ========================================================= */
 
-async function deleteCustomer(customerId) {
-    const customer = customers.find(function(item) {
-        return item.id === customerId;
-    });
+async function deleteCustomer(
+    customerId
+) {
+
+    const customer =
+        customers.find(
+            function(item) {
+
+                return item.id === customerId;
+
+            }
+        );
+
 
     if (!customer) {
         return;
     }
 
-    const confirmed = confirm(
-        "Delete " +
-        customer.name +
-        "? This cannot be undone."
-    );
+
+    const confirmed =
+        confirm(
+
+            "Delete " +
+            customer.name +
+            "? This cannot be undone."
+
+        );
+
 
     if (!confirmed) {
         return;
     }
 
-    const { error } = await supabaseClient
+
+    const { error } =
+    await supabaseClient
+
         .from("customers")
-        .delete()
-        .eq("id", customerId);
+
+    .delete()
+
+    .eq(
+        "id",
+        customerId
+    );
+
 
     if (error) {
-        console.error("Delete error:", error);
-        alert("Could not delete customer.");
+
+        console.error(
+            "Delete error:",
+            error
+        );
+
+        alert(
+            "Could not delete customer."
+        );
+
         return;
     }
 
+
     await loadCustomers();
+
     renderAll();
+
 }
 
 
 function deleteCurrentCustomer() {
+
     if (!currentProfileId) {
         return;
     }
 
-    const id = currentProfileId;
+
+    const id =
+        currentProfileId;
+
 
     closeProfileModal();
+
     deleteCustomer(id);
+
 }
 
 
@@ -1170,133 +2109,285 @@ function deleteCurrentCustomer() {
 ========================================================= */
 
 async function markCurrentFollowupDone() {
+
     if (!currentProfileId) {
         return;
     }
 
-    const customer = customers.find(function(item) {
-        return item.id === currentProfileId;
-    });
 
-    if (!customer || !customer.follow_up) {
+    const customer =
+        customers.find(
+            function(item) {
+
+                return (
+                    item.id ===
+                    currentProfileId
+                );
+
+            }
+        );
+
+
+    if (!customer ||
+        !customer.follow_up
+    ) {
+
         return;
+
     }
 
-    const { error } = await supabaseClient
+
+    const { error } =
+    await supabaseClient
+
         .from("customers")
-        .update({
-            follow_up_done: true
-        })
-        .eq("id", customer.id);
+
+    .update({
+
+        follow_up_done: true
+
+    })
+
+    .eq(
+        "id",
+        customer.id
+    );
+
 
     if (error) {
-        console.error("Follow-up error:", error);
+
+        console.error(
+            "Follow-up error:",
+            error
+        );
+
         return;
     }
 
+
     await loadCustomers();
+
     renderAll();
 
-    openProfile(customer.id);
+    openProfile(
+        customer.id
+    );
+
 }
 
 
 function renderFollowups() {
-    const container = document.getElementById("followupList");
+
+    const container =
+        document.getElementById(
+            "followupList"
+        );
+
 
     if (!container) {
         return;
     }
 
-    const list = customers
-        .filter(function(customer) {
+
+    const list =
+        customers
+
+        .filter(
+        function(customer) {
+
             return (
+
                 customer.follow_up &&
+
                 !customer.follow_up_done
+
             );
-        })
-        .sort(function(a, b) {
-            return a.follow_up.localeCompare(b.follow_up);
-        });
+
+        }
+    )
+
+    .sort(
+        function(a, b) {
+
+            return a.follow_up
+                .localeCompare(
+                    b.follow_up
+                );
+
+        }
+    );
+
 
     container.innerHTML = "";
 
+
     if (list.length === 0) {
+
         container.innerHTML =
-            '<div class="empty-inline">No pending follow-ups.</div>';
+            '<div class="empty-inline">' +
+            'No pending follow-ups.' +
+            '</div>';
+
         return;
     }
 
-    const today = todayString();
 
-    list.forEach(function(customer) {
-        const item = document.createElement("div");
+    const today =
+        todayString();
 
-        item.className = "followup-item";
 
-        let dateText = formatDate(customer.follow_up);
-        let dateClass = "followup-date";
+    list.forEach(
+        function(customer) {
 
-        if (customer.follow_up < today) {
-            dateText = "Overdue • " + dateText;
-            dateClass += " followup-overdue";
-        } else if (customer.follow_up === today) {
-            dateText = "Today";
-            dateClass += " followup-today";
-        }
+            const item =
+                document.createElement(
+                    "div"
+                );
 
-        item.innerHTML =
-            '<div class="item-main">' +
-            "<strong>" +
-            escapeHtml(customer.name) +
-            "</strong>" +
-            "<span>" +
-            escapeHtml(customer.service || "Customer") +
-            "</span>" +
-            "</div>" +
 
-            '<div class="item-right">' +
-            '<span class="' +
-            dateClass +
-            '">' +
-            dateText +
-            "</span>" +
+            item.className =
+                "followup-item";
 
-            '<button class="done-btn">Done</button>' +
 
-            "</div>";
+            let dateText =
+                formatDate(
+                    customer.follow_up
+                );
 
-        item.querySelector(".item-main").addEventListener(
-            "click",
-            function() {
-                openProfile(customer.id);
+
+            let dateClass =
+                "followup-date";
+
+
+            if (
+                customer.follow_up <
+                today
+            ) {
+
+                dateText =
+                    "Overdue • " +
+                    dateText;
+
+                dateClass +=
+                    " followup-overdue";
+
+            } else if (
+                customer.follow_up ===
+                today
+            ) {
+
+                dateText =
+                    "Today";
+
+                dateClass +=
+                    " followup-today";
+
             }
-        );
 
-        item.querySelector(".done-btn").addEventListener(
-            "click",
-            async function(event) {
-                event.stopPropagation();
 
-                const { error } = await supabaseClient
-                    .from("customers")
-                    .update({
-                        follow_up_done: true
-                    })
-                    .eq("id", customer.id);
+            item.innerHTML =
 
-                if (error) {
-                    console.error(error);
-                    return;
+                '<div class="item-main">' +
+
+                '<strong>' +
+                escapeHtml(
+                    customer.name
+                ) +
+                '</strong>' +
+
+                '<span>' +
+                escapeHtml(
+                    customer.service ||
+                    "Customer"
+                ) +
+                '</span>' +
+
+                '</div>' +
+
+                '<div class="item-right">' +
+
+                '<span class="' +
+                dateClass +
+                '">' +
+
+                escapeHtml(
+                    dateText
+                ) +
+
+                '</span>' +
+
+                '<button class="done-btn">' +
+                'Done' +
+                '</button>' +
+
+                '</div>';
+
+
+            item.querySelector(
+                ".item-main"
+            ).addEventListener(
+                "click",
+                function() {
+
+                    openProfile(
+                        customer.id
+                    );
+
                 }
+            );
 
-                await loadCustomers();
-                renderAll();
-            }
-        );
 
-        container.appendChild(item);
-    });
+            item.querySelector(
+                ".done-btn"
+            ).addEventListener(
+                "click",
+                async function(event) {
+
+                    event.stopPropagation();
+
+
+                    const { error } =
+                    await supabaseClient
+
+                        .from("customers")
+
+                    .update({
+
+                        follow_up_done: true
+
+                    })
+
+                    .eq(
+                        "id",
+                        customer.id
+                    );
+
+
+                    if (error) {
+
+                        console.error(
+                            error
+                        );
+
+                        return;
+                    }
+
+
+                    await loadCustomers();
+
+                    renderAll();
+
+                }
+            );
+
+
+            container.appendChild(
+                item
+            );
+
+        }
+    );
+
 }
 
 
@@ -1305,89 +2396,187 @@ function renderFollowups() {
 ========================================================= */
 
 function renderPayments() {
-    const paymentList = document.getElementById("paymentList");
+
+    const paymentList =
+        document.getElementById(
+            "paymentList"
+        );
+
 
     let totalPaid = 0;
+
     let totalOwed = 0;
+
     let customersOwing = 0;
 
-    customers.forEach(function(customer) {
-        totalPaid += getPaid(customer);
-        totalOwed += getOwed(customer);
 
-        if (getOwed(customer) > 0) {
-            customersOwing++;
+    customers.forEach(
+        function(customer) {
+
+            totalPaid +=
+                getPaid(customer);
+
+            totalOwed +=
+                getOwed(customer);
+
+            if (
+                getOwed(customer) > 0
+            ) {
+
+                customersOwing++;
+
+            }
+
         }
-    });
+    );
 
-    document.getElementById("paymentOutstanding").textContent =
+
+    document.getElementById(
+            "paymentOutstanding"
+        ).textContent =
         money(totalOwed);
 
-    document.getElementById("paymentReceived").textContent =
+
+    document.getElementById(
+            "paymentReceived"
+        ).textContent =
         money(totalPaid);
 
-    document.getElementById("customersOwing").textContent =
+
+    document.getElementById(
+            "customersOwing"
+        ).textContent =
         customersOwing;
+
 
     if (!paymentList) {
         return;
     }
 
-    const owing = customers
-        .filter(function(customer) {
-            return getOwed(customer) > 0;
-        })
-        .sort(function(a, b) {
-            return getOwed(b) - getOwed(a);
-        });
+
+    const owing =
+        customers
+
+        .filter(
+        function(customer) {
+
+            return (
+                getOwed(customer) > 0
+            );
+
+        }
+    )
+
+    .sort(
+        function(a, b) {
+
+            return (
+                getOwed(b) -
+                getOwed(a)
+            );
+
+        }
+    );
+
 
     paymentList.innerHTML = "";
 
+
     if (owing.length === 0) {
+
         paymentList.innerHTML =
-            '<div class="empty-inline">No outstanding payments.</div>';
+            '<div class="empty-inline">' +
+            'No outstanding payments.' +
+            '</div>';
+
         return;
     }
 
-    owing.forEach(function(customer) {
-        const item = document.createElement("div");
 
-        item.className = "payment-item";
+    owing.forEach(
+        function(customer) {
 
-        item.innerHTML =
-            '<div class="item-main">' +
-            "<strong>" +
-            escapeHtml(customer.name) +
-            "</strong>" +
-            "<span>" +
-            escapeHtml(customer.service || "Customer") +
-            "</span>" +
-            "</div>" +
+            const item =
+                document.createElement(
+                    "div"
+                );
 
-            '<div class="item-right">' +
-            "<strong>" +
-            money(getOwed(customer)) +
-            "</strong>" +
-            '<button class="done-btn">Record Payment</button>' +
-            "</div>";
 
-        item.querySelector(".done-btn").addEventListener(
-            "click",
-            function(event) {
-                event.stopPropagation();
-                openPaymentModal(customer.id);
-            }
-        );
+            item.className =
+                "payment-item";
 
-        item.querySelector(".item-main").addEventListener(
-            "click",
-            function() {
-                openProfile(customer.id);
-            }
-        );
 
-        paymentList.appendChild(item);
-    });
+            item.innerHTML =
+
+                '<div class="item-main">' +
+
+                '<strong>' +
+                escapeHtml(
+                    customer.name
+                ) +
+                '</strong>' +
+
+                '<span>' +
+                escapeHtml(
+                    customer.service ||
+                    "Customer"
+                ) +
+                '</span>' +
+
+                '</div>' +
+
+                '<div class="item-right">' +
+
+                '<strong>' +
+                money(
+                    getOwed(customer)
+                ) +
+                '</strong>' +
+
+                '<button class="done-btn">' +
+                'Record Payment' +
+                '</button>' +
+
+                '</div>';
+
+
+            item.querySelector(
+                ".done-btn"
+            ).addEventListener(
+                "click",
+                function(event) {
+
+                    event.stopPropagation();
+
+                    openPaymentModal(
+                        customer.id
+                    );
+
+                }
+            );
+
+
+            item.querySelector(
+                ".item-main"
+            ).addEventListener(
+                "click",
+                function() {
+
+                    openProfile(
+                        customer.id
+                    );
+
+                }
+            );
+
+
+            paymentList.appendChild(
+                item
+            );
+
+        }
+    );
+
 }
 
 
@@ -1395,30 +2584,65 @@ function renderPayments() {
    MODAL OUTSIDE CLICK
 ========================================================= */
 
-document.addEventListener("click", function(event) {
-    if (event.target.classList.contains("modal-overlay")) {
-        event.target.classList.remove("active");
-        event.target.style.display = "none";
+document.addEventListener(
+    "click",
+    function(event) {
+
+        if (
+            event.target.classList.contains(
+                "modal-overlay"
+            )
+        ) {
+
+            event.target.classList.remove(
+                "active"
+            );
+
+            event.target.style.display =
+                "none";
+
+        }
+
     }
-});
+);
 
 
 /* =========================================================
    ESCAPE KEY
 ========================================================= */
 
-document.addEventListener("keydown", function(event) {
-    if (event.key !== "Escape") {
-        return;
-    }
+document.addEventListener(
+    "keydown",
+    function(event) {
 
-    document
-        .querySelectorAll(".modal-overlay.active")
-        .forEach(function(modal) {
-            modal.classList.remove("active");
-            modal.style.display = "none";
-        });
-});
+        if (
+            event.key !== "Escape"
+        ) {
+
+            return;
+
+        }
+
+
+        document
+            .querySelectorAll(
+                ".modal-overlay.active"
+            )
+            .forEach(
+                function(modal) {
+
+                    modal.classList.remove(
+                        "active"
+                    );
+
+                    modal.style.display =
+                        "none";
+
+                }
+            );
+
+    }
+);
 
 
 /* =========================================================
@@ -1426,101 +2650,233 @@ document.addEventListener("keydown", function(event) {
 ========================================================= */
 
 function setupButtons() {
-    const openModal = document.getElementById("openModal");
+
+    const openModal =
+        document.getElementById(
+            "openModal"
+        );
+
+
     const customersAddBtn =
-        document.getElementById("customersAddBtn");
+        document.getElementById(
+            "customersAddBtn"
+        );
+
+
     const emptyAddBtn =
-        document.getElementById("emptyAddBtn");
+        document.getElementById(
+            "emptyAddBtn"
+        );
+
+
     const mobileMenu =
-        document.getElementById("mobileMenu");
+        document.getElementById(
+            "mobileMenu"
+        );
+
+
     const logoutBtn =
-        document.getElementById("logoutBtn");
+        document.getElementById(
+            "logoutBtn"
+        );
+
 
     if (openModal) {
-        openModal.addEventListener("click", function() {
-            openCustomerModal();
-        });
+
+        openModal.addEventListener(
+            "click",
+            function() {
+
+                openCustomerModal();
+
+            }
+        );
+
     }
+
 
     if (customersAddBtn) {
-        customersAddBtn.addEventListener("click", function() {
-            openCustomerModal();
-        });
+
+        customersAddBtn.addEventListener(
+            "click",
+            function() {
+
+                openCustomerModal();
+
+            }
+        );
+
     }
+
 
     if (emptyAddBtn) {
-        emptyAddBtn.addEventListener("click", function() {
-            openCustomerModal();
-        });
+
+        emptyAddBtn.addEventListener(
+            "click",
+            function() {
+
+                openCustomerModal();
+
+            }
+        );
+
     }
+
 
     if (mobileMenu) {
-        mobileMenu.addEventListener("click", function() {
-            const sidebar = document.querySelector(".sidebar");
 
-            if (sidebar) {
-                sidebar.classList.toggle("mobile-open");
+        mobileMenu.addEventListener(
+            "click",
+            function() {
+
+                const sidebar =
+                    document.querySelector(
+                        ".sidebar"
+                    );
+
+                if (sidebar) {
+
+                    sidebar.classList.toggle(
+                        "mobile-open"
+                    );
+
+                }
+
             }
-        });
+        );
+
     }
+
 
     if (logoutBtn) {
-        logoutBtn.addEventListener("click", logout);
+
+        logoutBtn.addEventListener(
+            "click",
+            logout
+        );
+
     }
 
-    document
-        .getElementById("closeCustomerModal")
-        .addEventListener("click", closeCustomerModal);
 
     document
-        .getElementById("cancelCustomerModal")
-        .addEventListener("click", closeCustomerModal);
+        .getElementById(
+            "closeCustomerModal"
+        )
+        .addEventListener(
+            "click",
+            closeCustomerModal
+        );
+
 
     document
-        .getElementById("closeProfileModal")
-        .addEventListener("click", closeProfileModal);
+        .getElementById(
+            "cancelCustomerModal"
+        )
+        .addEventListener(
+            "click",
+            closeCustomerModal
+        );
+
 
     document
-        .getElementById("closePaymentModal")
-        .addEventListener("click", closePaymentModal);
+        .getElementById(
+            "closeProfileModal"
+        )
+        .addEventListener(
+            "click",
+            closeProfileModal
+        );
+
 
     document
-        .getElementById("cancelPaymentModal")
-        .addEventListener("click", closePaymentModal);
+        .getElementById(
+            "closePaymentModal"
+        )
+        .addEventListener(
+            "click",
+            closePaymentModal
+        );
+
 
     document
-        .getElementById("customerForm")
-        .addEventListener("submit", handleCustomerSubmit);
+        .getElementById(
+            "cancelPaymentModal"
+        )
+        .addEventListener(
+            "click",
+            closePaymentModal
+        );
+
 
     document
-        .getElementById("paymentForm")
-        .addEventListener("submit", handlePaymentSubmit);
+        .getElementById(
+            "customerForm"
+        )
+        .addEventListener(
+            "submit",
+            handleCustomerSubmit
+        );
+
 
     document
-        .getElementById("profileEditBtn")
-        .addEventListener("click", editCurrentCustomer);
+        .getElementById(
+            "paymentForm"
+        )
+        .addEventListener(
+            "submit",
+            handlePaymentSubmit
+        );
+
 
     document
-        .getElementById("profilePaymentBtn")
-        .addEventListener("click", function() {
-            if (currentProfileId) {
-                openPaymentModal(currentProfileId);
+        .getElementById(
+            "profileEditBtn"
+        )
+        .addEventListener(
+            "click",
+            editCurrentCustomer
+        );
+
+
+    document
+        .getElementById(
+            "profilePaymentBtn"
+        )
+        .addEventListener(
+            "click",
+            function() {
+
+                if (currentProfileId) {
+
+                    openPaymentModal(
+                        currentProfileId
+                    );
+
+                }
+
             }
-        });
+        );
+
 
     document
-        .getElementById("profileFollowupBtn")
+        .getElementById(
+            "profileFollowupBtn"
+        )
         .addEventListener(
             "click",
             markCurrentFollowupDone
         );
 
+
     document
-        .getElementById("profileDeleteBtn")
+        .getElementById(
+            "profileDeleteBtn"
+        )
         .addEventListener(
             "click",
             deleteCurrentCustomer
         );
+
 }
 
 
@@ -1528,40 +2884,120 @@ function setupButtons() {
    INITIALIZE
 ========================================================= */
 
-document.addEventListener("DOMContentLoaded", async function() {
-    document
-        .getElementById("loginForm")
-        .addEventListener("submit", handleLogin);
+document.addEventListener(
+    "DOMContentLoaded",
+    async function() {
 
-    document
-        .getElementById("googleLoginBtn")
-        .addEventListener("click", loginWithGoogle);
+        document
+            .getElementById(
+                "loginForm"
+            )
+            .addEventListener(
+                "submit",
+                handleLogin
+            );
 
-    setupButtons();
 
-    await checkAuth();
+        document
+            .getElementById(
+                "googleLoginBtn"
+            )
+            .addEventListener(
+                "click",
+                loginWithGoogle
+            );
 
-    const {
-        data: { session }
-    } = await supabaseClient.auth.getSession();
 
-    if (session) {
-        await startApp();
+        setupButtons();
+
+
+        await checkAuth();
+
+
+        const {
+            data: { session }
+        } = await supabaseClient.auth.getSession();
+
+
+        if (session) {
+
+            await startApp();
+
+        }
+
     }
-});
-/* SERVICE WORKER */
+);
 
-if ("serviceWorker" in navigator) {
-    window.addEventListener("load", function() {
-        navigator.serviceWorker.register("./service-worker.js")
-            .then(function() {
-                console.log("FOLLOWUP service worker registered.");
-            })
-            .catch(function(error) {
-                console.error(
-                    "Service worker registration failed:",
-                    error
-                );
-            });
-    });
+
+/* =========================================================
+   AUTH STATE CHANGE
+========================================================= */
+
+supabaseClient.auth.onAuthStateChange(
+    async function(event, session) {
+
+        if (
+            event === "SIGNED_IN" &&
+            session
+        ) {
+
+            await startApp();
+
+        }
+
+        if (
+            event === "SIGNED_OUT"
+        ) {
+
+            customers = [];
+
+            currentProfileId = null;
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   SERVICE WORKER
+========================================================= */
+
+if (
+    "serviceWorker" in navigator
+) {
+
+    window.addEventListener(
+        "load",
+        function() {
+
+            navigator.serviceWorker
+                .register(
+                    "./service-worker.js"
+                )
+
+            .then(
+                function() {
+
+                    console.log(
+                        "FOLLOWUP service worker registered."
+                    );
+
+                }
+            )
+
+            .catch(
+                function(error) {
+
+                    console.error(
+                        "Service worker registration failed:",
+                        error
+                    );
+
+                }
+            );
+
+        }
+    );
+
 }
